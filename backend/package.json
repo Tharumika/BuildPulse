@@ -1,0 +1,25 @@
+{
+  "name": "buildpulse-backend",
+  "version": "1.0.0",
+  "description": "CI/CD Pipeline Health Dashboard — API server",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "jest --verbose",
+    "seed": "node scripts/seedData.js"
+  },
+  "keywords": [
+    "cicd",
+    "dashboard",
+    "pipeline",
+    "metrics"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.4"
+  }
+}
