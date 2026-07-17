@@ -2,6 +2,11 @@
 
 A full-stack dashboard for monitoring build pipeline health (pass/fail rates, build duration trends, deployment frequency) built with Node.js, MongoDB, React, and Docker — deployed to AWS.
 
+## 🚀 Live Demo
+
+- **Frontend (React on AWS S3):** [http://buildpulse-frontend.s3-website-us-east-1.amazonaws.com](http://buildpulse-frontend.s3-website-us-east-1.amazonaws.com)
+- **Backend API (Node.js on Elastic Beanstalk):** [http://buildpulse-dashboard.us-east-1.elasticbeanstalk.com/health](http://buildpulse-dashboard.us-east-1.elasticbeanstalk.com/health)
+
 ## Why I built this
 
 I noticed the JD specifically mentioned engineering metrics and developer productivity tooling — that's not something every company asks for, so I figured it reflected something the engineering team actually cares about internally. Rather than build another generic CRUD app, I built something that speaks directly to that. Without visibility into pipeline health data, teams often don't notice a CI system degrading until it's already a bottleneck — builds creeping from 2 min to 8 min, or a flaky test causing repeated failures. A simple dashboard makes that visible early.
