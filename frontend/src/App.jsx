@@ -1,122 +1,107 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect, useCallback } from 'react';
+import { fetchEvents, fetchSummary } from './api/eventsApi';
+import SummaryCards from './components/SummaryCards';
+import PassFailChart from './components/PassFailChart';
+import DurationChart from './components/DurationChart';
+import logoUrl from './assets/BuildPulse.png';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [events, setEvents] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [project, setProject] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      const [eventsData, summaryData] = await Promise.all([
+        fetchEvents(project),
+        fetchSummary(project),
+      ]);
+      setEvents(eventsData);
+      setSummary(summaryData);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [project]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const projects = [...new Set(events.map(e => e.project))];
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner" />
+        <span style={{ color: 'var(--text-muted)' }}>Loading dashboard...</span>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app">
+      <header className="header">
+        <div className="header-left">
+          <img src={logoUrl} alt="BuildPulse Logo" className="header-logo" />
+          <h1>Build<span>Pulse</span></h1>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+        <div className="header-right">
+          {lastUpdated && (
+            <span className="last-updated">
+              Updated {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            className={`refresh-btn ${refreshing ? 'spinning' : ''}`}
+            onClick={loadData}
+            disabled={refreshing}
+          >
+            <span className="refresh-icon">↻</span>
+            Refresh
+          </button>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+      </header>
+
+      {error && <div className="error-banner">⚠ {error}</div>}
+
+      <div className="filter-bar">
+        <select
+          className="filter-select"
+          value={project}
+          onChange={e => setProject(e.target.value)}
         >
-          Count is {count}
-        </button>
-      </section>
+          <option value="">All Projects</option>
+          {projects.map(p => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
 
-      <div className="ticks"></div>
+      <SummaryCards summary={summary} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      <div className="charts-grid">
+        <div className="chart-card">
+          <h3 className="chart-title">Pass / Fail Rate</h3>
+          <PassFailChart events={events} />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className="chart-card">
+          <h3 className="chart-title">Build Duration Trend</h3>
+          <DurationChart events={events} />
         </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
