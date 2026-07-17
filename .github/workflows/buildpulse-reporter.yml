@@ -1,0 +1,57 @@
+name: BuildPulse Real Data Pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Start Timer
+        id: timer
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      # -------------------------------------------------------------
+      # This is where your actual CI commands would go!
+      # For example: npm test, docker build, maven clean install, etc.
+      # We'll simulate a 5-15 second "build" here just as a placeholder
+      # -------------------------------------------------------------
+      - name: Simulate Build/Test Process
+        run: |
+          sleep $(( ( RANDOM % 10 )  + 5 ))
+          # Randomly fail 20% of the time to make the charts interesting
+          if [ $(( RANDOM % 100 )) -lt 20 ]; then
+            echo "Simulated random build failure!"
+            exit 1
+          fi
+
+      - name: Report Success to BuildPulse
+        if: success()
+        run: |
+          DURATION=$(( $(date +%s) - START_TIME ))
+          curl -X POST http://buildpulse-dashboard.us-east-1.elasticbeanstalk.com/api/events \
+          -H "Content-Type: application/json" \
+          -d '{
+            "project": "${{ github.repository }}",
+            "status": "success",
+            "durationSeconds": '"$DURATION"',
+            "branch": "${{ github.ref_name }}"
+          }'
+
+      - name: Report Failure to BuildPulse
+        if: failure()
+        run: |
+          DURATION=$(( $(date +%s) - START_TIME ))
+          curl -X POST http://buildpulse-dashboard.us-east-1.elasticbeanstalk.com/api/events \
+          -H "Content-Type: application/json" \
+          -d '{
+            "project": "${{ github.repository }}",
+            "status": "failure",
+            "durationSeconds": '"$DURATION"',
+            "branch": "${{ github.ref_name }}"
+          }'
