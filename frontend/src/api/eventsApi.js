@@ -1,4 +1,4 @@
-const API_BASE = '/api/events';
+const API_BASE = (import.meta.env.VITE_API_URL || '') + '/api/events';
 
 export async function fetchEvents(project = '') {
   const params = new URLSearchParams();
