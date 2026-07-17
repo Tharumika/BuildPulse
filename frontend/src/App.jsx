@@ -3,6 +3,7 @@ import { fetchEvents, fetchSummary } from './api/eventsApi';
 import SummaryCards from './components/SummaryCards';
 import PassFailChart from './components/PassFailChart';
 import DurationChart from './components/DurationChart';
+import logoUrl from './assets/BuildPulse.png';
 import './App.css';
 
 function App() {
@@ -52,7 +53,7 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-left">
-          <div className="header-logo">⚡</div>
+          <img src={logoUrl} alt="BuildPulse Logo" className="header-logo" />
           <h1>Build<span>Pulse</span></h1>
         </div>
         <div className="header-right">

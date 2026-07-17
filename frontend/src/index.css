@@ -62,12 +62,8 @@ body {
 .header-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
+  object-fit: contain;
+  display: block;
 }
 
 .header h1 {
